@@ -59,7 +59,7 @@ public abstract class AbstractHarvestTool extends AbstractTool {
 			// is finished.
 
 			inventory.addItem(crop);
-			TIMER.schedule(
+			Timer.schedule(
 					new Task() {
 						@Override
 						public void run() {

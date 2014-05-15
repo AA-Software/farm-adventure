@@ -65,9 +65,9 @@ public class Player {
 			s.setMusicVolume(prefs.getFloat("GAMEVOLUME"));
 			s.setSoundVolume(prefs.getFloat("SOUNDVOLUME"));
 		} else {
-			s.setMasterVolume(1.0f);
-			s.setMusicVolume(1.0f);
-			s.setSoundVolume(1.0f);
+			s.setMasterVolume(1);
+			s.setMusicVolume(1);
+			s.setSoundVolume(1);
 		}
 	}
 

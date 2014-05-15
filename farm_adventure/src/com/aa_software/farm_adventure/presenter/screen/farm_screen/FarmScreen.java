@@ -30,10 +30,9 @@ import com.aa_software.farm_adventure.presenter.screen.AbstractScreen;
 import com.aa_software.farm_adventure.presenter.screen.ScoreScreen;
 import com.aa_software.farm_adventure.presenter.utility.TextureHelper;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -53,7 +52,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -276,7 +274,7 @@ public class FarmScreen extends AbstractScreen {
 	}
 
 	/* Game */
-	protected static final long GAME_TIME_MILLIS = 240000;
+	protected static final long GAME_TIME_MILLIS = 240000; // 240000 = 4 minutes
 
 	protected long gameStartTime;
 
@@ -291,8 +289,6 @@ public class FarmScreen extends AbstractScreen {
 	protected static final String TILE_SET_NAME = "tileSet128";
 
 	protected static final int TILE_SIZE = 128;
-	/* Skin */
-	public static final String SKIN_JSON_UI = "skin/uiskin.json";
 
 	/* Layer */
 	/*
@@ -318,46 +314,44 @@ public class FarmScreen extends AbstractScreen {
 			WORKER_LABEL_Y = (float) (SCREEN_HEIGHT * .22),
 			WINDOW_X = (float) (SCREEN_WIDTH * .25),
 			WINDOW_Y = (float) (SCREEN_HEIGHT * .13),
-			//INVENTORY_HEIGHT = SCREEN_HEIGHT - 14 * (TILE_SIZE / 10),
-			INVENTORY_HEIGHT = (float)(SCREEN_HEIGHT *.63),
-			//WORKER_HEIGHT = 70,
+			// INVENTORY_HEIGHT = SCREEN_HEIGHT - 14 * (TILE_SIZE / 10),
+			INVENTORY_HEIGHT = (float) (SCREEN_HEIGHT * .63),
+			// WORKER_HEIGHT = 70,
 			INFO_X = (float) (SCREEN_WIDTH * .25),
 			INFO_Y = (float) (SCREEN_HEIGHT * .5),
 			INFO_WIDGTH = (float) (SCREEN_WIDTH * .25);
 
-	/* Font setup */
-	protected static final BitmapFont FONT = new BitmapFont();
-	protected static final LabelStyle LABEL_STYLE = new LabelStyle(FONT,
-			Color.BLACK);
-
 	protected AbstractItem selection;
 
-	protected Farm farm;
+	protected final Farm farm;
+
+	protected OrthogonalTiledMapRenderer renderer;
+
 	protected TiledMap map;
 
 	protected TiledMapTileSet tileSet;
 	protected HashMap<String, Integer> tileMap;
 	protected InputMultiplexer inputMultiplexer;
-	protected Skin skin;
-	protected Stage plantMenuStage;
+	protected InputMultiplexer marketMultiplexer;
 
 	protected Window plantWindow;
-	protected Skin inventorySkin;
-	protected Stage inventoryStage;
 	protected Window inventoryWindow;
+	protected Window irrigationWindow;
+	protected Window infoWindow;
+
+	protected Stage inventoryStage;
+	protected Stage plantMenuStage;
+	protected Stage irrigationMenuStage;
+	protected Stage statusBarStage;
+	protected Stage workerStage;
+	protected Stage infoStage;
 
 	protected Table inventoryScrollTable;
-	protected Boolean inventoryOpen = false;
-
-	protected final Stage irrigationMenuStage;
-	protected final Stage statusBarStage;
-
-	protected Window irrigationWindow;
-	InputMultiplexer marketMultiplexer;
-	protected Stage workerStage;
 	protected Table workerQueue;
 	protected Table workerTable;
-	public int selectedWorker = UNSELECT;
+
+	protected Boolean inventoryOpen = false;
+	protected int selectedWorker = UNSELECT;
 
 	protected boolean workerClicksDisabled;
 	protected boolean toolBarClicksDisabled;
@@ -367,79 +361,25 @@ public class FarmScreen extends AbstractScreen {
 	protected boolean inventoryClicksDisabled;
 
 	protected boolean disableGameTime;
-
-	private Stage infoStage;
-
-	private Window infoWindow;
-
 	protected boolean gameOver;
 
 	protected Stats stats;
-	
-	Texture beetTexture = new Texture(Gdx.files.internal("textures/" + "beetSeed" + ".png"));
-	Texture cabbageTexture = new Texture(Gdx.files.internal("textures/" + "cabbageSeed" + ".png"));
-	Texture carrotTexture = new Texture(Gdx.files.internal("textures/" + "carrotSeed" + ".png"));
-	Texture potatoTexture = new Texture(Gdx.files.internal("textures/" + "potatoSeed" + ".png"));
 
-	TextureRegion seedImage;
-	
+	protected Texture beetTexture;
+	protected Texture cabbageTexture;
+	protected Texture carrotTexture;
+	protected Texture potatoTexture;
+	protected Texture info;
+	protected final ArrayList<Texture> workerTextures, irrigationTextures,
+			itemTextures;
+
+	protected BitmapFont font;
+
 	public FarmScreen(Biome.Type biome) {
 		farm = new Farm(biome);
-		float width = STAGE_WIDTH;
-		float height = STAGE_HEIGHT;
-
-		gameOver = false;
-		disableGameTime = false;
-		setAllGameClicksDisabled(false);
-
-		selection = null;
-
-		map = new TmxMapLoader().load(TILE_MAP_NAME);
-		tileSet = map.getTileSets().getTileSet(TILE_SET_NAME);
-		/* Push all of the tiles for each layer into the tile map */
-		Iterator<TiledMapTile> tileIterator;
-		tileMap = new HashMap<String, Integer>();
-		for (int i = 0; i < allLayers.length; i++) {
-			for (tileIterator = tileSet.iterator(); tileIterator.hasNext();) {
-				TiledMapTile tile = tileIterator.next();
-				tileMap.put(tile.getProperties()
-						.get(allLayers[i], String.class), tile.getId());
-			}
-		}
-
-		skin = new Skin(Gdx.files.internal(SKIN_JSON_UI));
-
-		plantMenuStage = new Stage(width,
-				height, true);
-		irrigationMenuStage = new Stage(width,
-				height, true);
-		statusBarStage = new Stage(SCREEN_WIDTH,
-				SCREEN_HEIGHT, true);
-		inventoryStage = new Stage(width,
-				height, true);
-		workerStage = new Stage();
-		infoStage = new Stage(width,height,true);
-
-		marketMultiplexer = new InputMultiplexer();
-		marketMultiplexer.addProcessor(inventoryStage);
-		marketMultiplexer.addProcessor(workerStage);
-
-		stats = new Stats();
-
-		irrigationWindow = setupWindow(" Pick a side to irrigate: ", WINDOW_X,
-				WINDOW_Y);
-		irrigationMenuStage.addActor(irrigationWindow);
-
-		plantWindow = setupWindow(" Pick a type of seed: ", WINDOW_X, WINDOW_Y);
-		plantMenuStage.addActor(plantWindow);
-
-		infoWindow = setupWindow(" Information ", INFO_X, INFO_Y);
-		infoStage.addActor(infoWindow);
-
-		workerQueue = new Table();
-		setupWorkerTable();
-		inventoryScrollTable = new Table();
-		setupInventoryWindow();
+		workerTextures = new ArrayList<Texture>();
+		irrigationTextures = new ArrayList<Texture>();
+		itemTextures = new ArrayList<Texture>();
 	}
 
 	/**
@@ -450,25 +390,20 @@ public class FarmScreen extends AbstractScreen {
 	 */
 	protected void addSeedButton(AbstractSeed seed) {
 		Table seedTable = new Table();
+		TextureRegion seedImage = null;
 		if (seed.getTextureName() == "beetSeed") {
 			seedImage = new TextureRegion(beetTexture);
-		}
-		else if (seed.getTextureName() == "cabbageSeed") {
+		} else if (seed.getTextureName() == "cabbageSeed") {
 			seedImage = new TextureRegion(cabbageTexture);
-		}
-		else if (seed.getTextureName() == "carrotSeed") {
+		} else if (seed.getTextureName() == "carrotSeed") {
 			seedImage = new TextureRegion(carrotTexture);
-		}
-		else if (seed.getTextureName() == "potatoSeed") {
+		} else if (seed.getTextureName() == "potatoSeed") {
 			seedImage = new TextureRegion(potatoTexture);
 		}
-		//Texture seedTexture = new Texture(Gdx.files.internal("textures/"
-				//+ seed.getTextureName() + ".png"));
-		//TextureRegion seedImage = new TextureRegion(seedTexture);
 		seedTable.row();
 		seedTable.add(new Image(seedImage));
 		Label seedQuantity = new Label("" + farm.getInventory().getCount(seed),
-				LABEL_STYLE);
+				skin);
 		seedTable.row();
 		seedTable.add(seedQuantity);
 		Button seedButton = new Button(seedTable, skin);
@@ -498,7 +433,7 @@ public class FarmScreen extends AbstractScreen {
 			}
 		}
 		score = score - Player.STARTING_BANKROLL;
-		if(score < 0){
+		if (score < 0) {
 			score = 0;
 		}
 
@@ -522,9 +457,9 @@ public class FarmScreen extends AbstractScreen {
 			int yCell = (int) (touchPos.y / TILE_SIZE);
 			updateState(xCell, yCell);
 		}
-		if (Gdx.input.isKeyPressed(Keys.BACK)){
+		if (Gdx.input.isKeyPressed(Keys.BACK)) {
 			Gdx.input.setCatchBackKey(true);
-			//TODO add a pop up asking if they want to quit
+			// TODO add a pop up asking if they want to quit
 			gameOver = true;
 		}
 	}
@@ -535,12 +470,32 @@ public class FarmScreen extends AbstractScreen {
 	 */
 	@Override
 	public void dispose() {
-		stats.setScore(PLAYER.getBankroll() + calculateScore());
-		PLAYER.setBankroll(PLAYER.getBankroll() + calculateScore());
+		super.dispose();
+		// stages
+		inventoryStage.dispose();
+		plantMenuStage.dispose();
+		irrigationMenuStage.dispose();
+		statusBarStage.dispose();
+		workerStage.dispose();
+		infoStage.dispose();
+		// textures
+		beetTexture.dispose();
+		cabbageTexture.dispose();
+		carrotTexture.dispose();
+		potatoTexture.dispose();
+		if (info != null) // TODO: need to do this?
+			info.dispose();
+		for (Texture texture : workerTextures)
+			texture.dispose();
+		for (Texture texture : irrigationTextures)
+			texture.dispose();
+		for (Texture texture : itemTextures)
+			texture.dispose();
+		// other
 		farm.disposeOfTimers();
 		map.dispose();
 		renderer.dispose();
-		FarmAdventure.getInstance().setScreen(new ScoreScreen(stats));
+		font.dispose();
 	}
 
 	/**
@@ -594,12 +549,11 @@ public class FarmScreen extends AbstractScreen {
 	public void render(float delta) {
 		if (gameOver) {
 			dispose();
+			stats.setScore(PLAYER.getBankroll() + calculateScore());
+			PLAYER.setBankroll(PLAYER.getBankroll() + calculateScore());
+			FarmAdventure.getInstance().setScreen(new ScoreScreen(stats));
 		} else {
-			/* Draw the base map to the screen */
-			Gdx.gl.glClearColor(0, 0, 0.2f, 1);
-			Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-
-			FONT.setScale(FONT_SCALE);
+			super.render(delta);
 
 			if (hasVisibleWindow() == false) {
 				Gdx.input.setInputProcessor(workerStage);
@@ -621,22 +575,25 @@ public class FarmScreen extends AbstractScreen {
 			renderer.render();
 
 			updateStatusBar();
+			statusBarStage.act(delta);
 			statusBarStage.draw();
 
 			updateWorkerQueue();
+			workerStage.act(delta);
 			workerStage.draw();
-			workerStage.act();
 
+			plantMenuStage.act(delta);
 			plantMenuStage.draw();
 
-			//updateInventoryTable();
+			inventoryStage.act(delta);
 			inventoryStage.draw();
-			inventoryStage.act();
 
+			irrigationMenuStage.act(delta);
 			irrigationMenuStage.draw();
 
+			infoStage.act(delta);
 			infoStage.draw();
-			infoStage.act();
+
 		}
 	}
 
@@ -644,8 +601,8 @@ public class FarmScreen extends AbstractScreen {
 	public void resize(int width, int height) {
 		super.resize(width, height);
 		workerStage.setViewport(STAGE_WIDTH, STAGE_HEIGHT, true);
-		//plantMenuStage.setViewport(width, height);
-		//irrigationMenuStage.setViewport(width, height);
+		// plantMenuStage.setViewport(width, height);
+		// irrigationMenuStage.setViewport(width, height);
 	}
 
 	/**
@@ -667,22 +624,19 @@ public class FarmScreen extends AbstractScreen {
 	 * Sets up the window to view inventory and market
 	 */
 	public void setupInventoryWindow() {
-		float width = STAGE_WIDTH;
-		float height = STAGE_HEIGHT;
-		inventorySkin = new Skin(Gdx.files.internal(SKIN_JSON_UI));
+
 		Table marketTable = new Table();
 		marketTable.layout();
 		inventoryStage.addActor(marketTable);
 		inventoryScrollTable.pack();
-		ScrollPane inventorySP = new ScrollPane(inventoryScrollTable,
-				inventorySkin);
+		ScrollPane inventorySP = new ScrollPane(inventoryScrollTable, skin);
 		marketTable.row();
-		marketTable.add(new Label("INVENTORY", inventorySkin))
-				.padLeft((float) (width * .4))
-				.padRight((float) (width * .15))
-				.width((float) (width * .33));
+		marketTable.add(new Label("INVENTORY", skin))
+				.padLeft((float) (SCREEN_WIDTH * .4))
+				.padRight((float) (SCREEN_WIDTH * .15))
+				.width((float) (SCREEN_WIDTH * .33));
 
-		TextButton exitButton = new TextButton("EXIT", inventorySkin, "default");
+		TextButton exitButton = new TextButton("EXIT", skin);
 		exitButton.setColor(Color.RED);
 		exitButton.addListener(new InputListener() {
 			@Override
@@ -694,24 +648,22 @@ public class FarmScreen extends AbstractScreen {
 				return true;
 			}
 		});
-		marketTable.add(exitButton).width(
-				(float) (width * .1));
+		marketTable.add(exitButton).width((float) (SCREEN_WIDTH * .1));
 		marketTable.row();
-		marketTable.add(inventorySP).colspan(2)
-				.width(width);
+		marketTable.add(inventorySP).colspan(2).width(SCREEN_WIDTH);
 		marketTable.pack();
 		marketTable.layout();
-		inventoryWindow = new Window("", inventorySkin);
+		inventoryWindow = new Window("", skin);
 		inventoryWindow.setModal(true);
 		inventoryWindow.setMovable(false);
 		inventoryWindow.setVisible(false);
 		inventoryOpen = false;
-		inventoryWindow.setSize(width, INVENTORY_HEIGHT);
-		inventoryWindow.setPosition(0, height);
+		inventoryWindow.setSize(SCREEN_WIDTH, INVENTORY_HEIGHT);
+		inventoryWindow.setPosition(0, SCREEN_HEIGHT);
 		inventoryWindow.defaults().spaceBottom(10);
 		inventoryWindow.row().fill().expandX();
 		inventoryWindow.add(marketTable).fill().expand().colspan(4)
-				.maxHeight(height);
+				.maxHeight(SCREEN_HEIGHT);
 		inventoryStage.addActor(inventoryWindow);
 	}
 
@@ -730,14 +682,13 @@ public class FarmScreen extends AbstractScreen {
 	 * Sets up the table to display available workers
 	 */
 	public final void setupWorkerTable() {
-		float width = STAGE_WIDTH;
-		float height = STAGE_HEIGHT;
+
 		updateWorkerQueue();
 		workerQueue.pack();
 		workerTable = new Table();
 		workerTable.add(workerQueue).fill().expandX();
-		workerTable.setPosition( (float) (width *.495),
-				(float) (height * .19));
+		workerTable.setPosition((float) (SCREEN_WIDTH * .495),
+				(float) (SCREEN_HEIGHT * .19));
 		workerStage.addActor(workerTable);
 	}
 
@@ -747,10 +698,15 @@ public class FarmScreen extends AbstractScreen {
 	@Override
 	public void show() {
 		super.show();
-		renderer = new OrthogonalTiledMapRenderer(map);
 
-		gameStartTime = System.currentTimeMillis();
+		gameOver = false;
+		disableGameTime = false;
+		setAllGameClicksDisabled(false);
 
+		selection = null;
+
+		map = new TmxMapLoader().load(TILE_MAP_NAME);
+		tileSet = map.getTileSets().getTileSet(TILE_SET_NAME);
 		/* Push all of the tiles for each layer into the tile map */
 		Iterator<TiledMapTile> tileIterator;
 		tileMap = new HashMap<String, Integer>();
@@ -761,6 +717,60 @@ public class FarmScreen extends AbstractScreen {
 						.get(allLayers[i], String.class), tile.getId());
 			}
 		}
+
+		plantMenuStage = new Stage(STAGE_WIDTH, STAGE_HEIGHT, true);
+		irrigationMenuStage = new Stage(STAGE_WIDTH, STAGE_HEIGHT, true);
+		statusBarStage = new Stage(SCREEN_WIDTH, SCREEN_HEIGHT, true);
+		inventoryStage = new Stage(STAGE_WIDTH, STAGE_HEIGHT, true);
+		workerStage = new Stage();
+		infoStage = new Stage(STAGE_WIDTH, STAGE_HEIGHT, true);
+
+		marketMultiplexer = new InputMultiplexer();
+		marketMultiplexer.addProcessor(inventoryStage);
+		marketMultiplexer.addProcessor(workerStage);
+
+		stats = new Stats();
+
+		irrigationWindow = setupWindow(" Pick a side to irrigate: ", WINDOW_X,
+				WINDOW_Y);
+		irrigationMenuStage.addActor(irrigationWindow);
+
+		plantWindow = setupWindow(" Pick a type of seed: ", WINDOW_X, WINDOW_Y);
+		plantMenuStage.addActor(plantWindow);
+
+		infoWindow = setupWindow(" Information ", INFO_X, INFO_Y);
+		infoStage.addActor(infoWindow);
+
+		workerQueue = new Table();
+		setupWorkerTable();
+		inventoryScrollTable = new Table();
+		setupInventoryWindow();
+
+		renderer = new OrthogonalTiledMapRenderer(map);
+
+		gameStartTime = System.currentTimeMillis();
+
+		/* Push all of the tiles for each layer into the tile map */
+		tileMap = new HashMap<String, Integer>();
+		for (int i = 0; i < allLayers.length; i++) {
+			for (tileIterator = tileSet.iterator(); tileIterator.hasNext();) {
+				TiledMapTile tile = tileIterator.next();
+				tileMap.put(tile.getProperties()
+						.get(allLayers[i], String.class), tile.getId());
+			}
+		}
+
+		potatoTexture = new Texture(Gdx.files.internal("textures/"
+				+ "potatoSeed" + ".png"));
+		carrotTexture = new Texture(Gdx.files.internal("textures/"
+				+ "carrotSeed" + ".png"));
+		cabbageTexture = new Texture(Gdx.files.internal("textures/"
+				+ "cabbageSeed" + ".png"));
+		beetTexture = new Texture(Gdx.files.internal("textures/" + "beetSeed"
+				+ ".png"));
+
+		font = new BitmapFont();
+		font.setScale(FONT_SCALE);
 	}
 
 	/**
@@ -958,7 +968,6 @@ public class FarmScreen extends AbstractScreen {
 	public void updateInventoryTable() {
 		inventoryScrollTable.clear();
 		inventoryScrollTable.layout();
-		float width = STAGE_WIDTH;
 
 		// inventory Stuff
 		Map<String, ArrayList<AbstractItem>> marketItems = this.farm
@@ -970,8 +979,7 @@ public class FarmScreen extends AbstractScreen {
 		int typeCount = typeSet.size();
 		Label type;
 		for (int j = 0; j < typeCount; j++) {
-			type = new Label(typeSet.get(j), inventorySkin, "default-font",
-					Color.ORANGE);
+			type = new Label(typeSet.get(j), skin, "default-font", Color.ORANGE);
 			type.setWrap(true);
 			inventoryScrollTable.row();
 			inventoryScrollTable.add(type).left();
@@ -985,9 +993,9 @@ public class FarmScreen extends AbstractScreen {
 						Gdx.files.internal("textures/"
 								+ marketItems.get(typeSet.get(j)).get(i)
 										.getTextureName() + ".png"));
+				itemTextures.add(itemTexture);
 				TextureRegion itemImage = new TextureRegion(itemTexture);
-				Button itemButton = new Button(new Image(itemImage),
-						inventorySkin);
+				Button itemButton = new Button(new Image(itemImage), skin);
 				itemButton.setDisabled(true);
 
 				inventoryTypeCount = farm.getInventory().getCount(
@@ -997,18 +1005,17 @@ public class FarmScreen extends AbstractScreen {
 				inventoryScrollTable.row();
 				inventoryScrollTable.add(itemButton).left();
 				Label itemName = new Label(marketItems.get(typeSet.get(j))
-						.get(i).toString(), inventorySkin);
+						.get(i).toString(), skin);
 				inventoryScrollTable.add(itemName)
-						.width((float) (width * .2)).left();
+						.width((float) (SCREEN_WIDTH * .2)).left();
 				Label itemInvCount = new Label(
-						Integer.toString(inventoryTypeCount), inventorySkin);
+						Integer.toString(inventoryTypeCount), skin);
 				inventoryScrollTable.add(itemInvCount)
-						.width((float) (width * .05)).left().padLeft(1);
-				Texture info = new Texture(
-						Gdx.files.internal("textures/info.png"));
+						.width((float) (SCREEN_WIDTH * .05)).left().padLeft(1);
+				info = new Texture(Gdx.files.internal("textures/info.png"));
+
 				TextureRegion infoReg = new TextureRegion(info);
-				Button infoButton = new Button(new Image(infoReg),
-						inventorySkin);
+				Button infoButton = new Button(new Image(infoReg), skin);
 				infoButton.padBottom(2);
 				infoButton.padLeft(2);
 				infoButton.padRight(4);
@@ -1021,28 +1028,26 @@ public class FarmScreen extends AbstractScreen {
 					DefaultWorker tempWorker = new DefaultWorker();
 					cost = tempWorker.getCost();
 					buyButton = new TextButton("HIRE " + " $" + cost
-							+ "/season", inventorySkin, "default");
+							+ "/season", skin, "default");
 					buyButton.addListener(new BuyClickListener(tempWorker,
 							itemInvCount, false));
 					inventoryScrollTable.add(buyButton)
-							.width((float) (width * .4))
-							.left();
+							.width((float) (SCREEN_WIDTH * .4)).left();
 					infoButton.addListener(new InfoClickListener(marketItems
 							.get(typeSet.get(j)).get(i)));
 					inventoryScrollTable.add(infoButton).left()
-							.padLeft((float) (width * .04));
+							.padLeft((float) (SCREEN_WIDTH * .04));
 				} else if (type.getText().toString().equals(AbstractSeed.TYPE)) {
-					buyButton = new TextButton("BUY " + " $" + cost,
-							inventorySkin, "default");
+					buyButton = new TextButton("BUY " + " $" + cost, skin,
+							"default");
 					buyButton.addListener(new BuyClickListener(marketItems.get(
 							typeSet.get(j)).get(i), itemInvCount, false));
 					inventoryScrollTable.add(buyButton)
-							.width((float) (width * .4))
-							.left();
+							.width((float) (SCREEN_WIDTH * .4)).left();
 					infoButton.addListener(new InfoClickListener(marketItems
 							.get(typeSet.get(j)).get(i)));
 					inventoryScrollTable.add(infoButton).left()
-							.padLeft((float) (width * .04));
+							.padLeft((float) (SCREEN_WIDTH * .04));
 				} else if (j > 2 && j < 7) { // if there are tools then
 					if (inventoryTypeCount > 0) {
 						AbstractTool toolUpgrade = ((AbstractTool) marketItems
@@ -1054,60 +1059,46 @@ public class FarmScreen extends AbstractScreen {
 											typeSet.get(j)).get(i)).getCost();
 							String upgradeName = toolUpgrade.getName();
 							buyButton = new TextButton(upgradeName
-									+ " upgrade $" + cost, inventorySkin,
-									"default");
+									+ " upgrade $" + cost, skin, "default");
 
 							buyButton.addListener(new BuyClickListener(
 									toolUpgrade, itemInvCount, true));
-							inventoryScrollTable
-									.add(buyButton)
-									.width((float) (width * .4))
-									.left();
+							inventoryScrollTable.add(buyButton)
+									.width((float) (SCREEN_WIDTH * .4)).left();
 							infoButton.addListener(new InfoClickListener(
 									toolUpgrade));
-							inventoryScrollTable
-									.add(infoButton)
-									.left()
-									.padLeft(
-											(float) (width * .04));
+							inventoryScrollTable.add(infoButton).left()
+									.padLeft((float) (SCREEN_WIDTH * .04));
 
 						} else {
-							Label noUpgrade = new Label("No Upgrade",
-									inventorySkin);
-							inventoryScrollTable
-									.add(noUpgrade)
-									.width((float) (width * .4))
-									.left();
+							Label noUpgrade = new Label("No Upgrade", skin);
+							inventoryScrollTable.add(noUpgrade)
+									.width((float) (SCREEN_WIDTH * .4)).left();
 						}
 					} else { // else buy or trade for the current tool
-						buyButton = new TextButton("BUY " + " $" + cost,
-								inventorySkin, "default");
+						buyButton = new TextButton("BUY " + " $" + cost, skin,
+								"default");
 						buyButton.addListener(new BuyClickListener(marketItems
 								.get(typeSet.get(j)).get(i), itemInvCount,
 								false));
 						inventoryScrollTable.add(buyButton)
-								.width((float) (width * .4))
-								.left();
+								.width((float) (SCREEN_WIDTH * .4)).left();
 						infoButton.addListener(new InfoClickListener(
 								marketItems.get(typeSet.get(j)).get(i)));
-						inventoryScrollTable
-								.add(infoButton)
-								.left()
-								.padLeft(
-										(float) (width * .04));
+						inventoryScrollTable.add(infoButton).left()
+								.padLeft((float) (SCREEN_WIDTH * .04));
 					}
 				} else {
-					sellButton = new TextButton("SELL " + " $" + value,
-							inventorySkin, "default");
+					sellButton = new TextButton("SELL " + " $" + value, skin,
+							"default");
 					sellButton.addListener(new SellClickListener(marketItems
 							.get(typeSet.get(j)).get(i), itemInvCount));
 					inventoryScrollTable.add(sellButton)
-							.width((float) (width * .4))
-							.left();
+							.width((float) (SCREEN_WIDTH * .4)).left();
 					infoButton.addListener(new InfoClickListener(marketItems
 							.get(typeSet.get(j)).get(i)));
 					inventoryScrollTable.add(infoButton).left()
-							.padLeft((float) (width * .04));
+							.padLeft((float) (SCREEN_WIDTH * .04));
 
 				}
 
@@ -1135,6 +1126,7 @@ public class FarmScreen extends AbstractScreen {
 					Gdx.files.internal(TextureHelper
 							.getIrrigationTextureFileName(EnumSet
 									.of(irrigation))));
+			irrigationTextures.add(irrigationTexture);
 			TextureRegion irrigationImage = new TextureRegion(irrigationTexture);
 			Button irrigationButton = new Button(new Image(irrigationImage),
 					skin);
@@ -1244,7 +1236,7 @@ public class FarmScreen extends AbstractScreen {
 					selection.update(farm.getPlot(x, y - FIELD_STARTING_Y),
 							farm.getInventory());
 					unselect();
-					//updateInventoryTable();
+					// updateInventoryTable();
 				}
 			} else if (y == 0 && !toolBarClicksDisabled) {
 				/*
@@ -1307,8 +1299,10 @@ public class FarmScreen extends AbstractScreen {
 		statusBarStage.clear();
 
 		/* Bankroll label setup */
-		Label bankBalance = new Label("Bank Balance: \n       $" + PLAYER.getBankroll(),
-				LABEL_STYLE);
+		LabelStyle labelStyle = new LabelStyle();
+		labelStyle.font = font;
+		Label bankBalance = new Label("Bank Balance: \n       $"
+				+ PLAYER.getBankroll(), labelStyle);
 		bankBalance.setPosition(BANK_LABEL_X, BANK_LABEL_Y);
 
 		/* Time label setup */
@@ -1333,12 +1327,12 @@ public class FarmScreen extends AbstractScreen {
 		} else {
 			time = "INFINITE!";
 		}
-		Label timeRemaining = new Label("Time Remaining: " + time, LABEL_STYLE);
+		Label timeRemaining = new Label("Time Remaining: " + time, labelStyle);
 		timeRemaining.setPosition(TIME_LABEL_X, TIME_LABEL_Y);
 
 		/* Worker label setup */
 		Label workers = new Label("Workers: \n       "
-				+ farm.getInventory().getWorkerCount(), LABEL_STYLE);
+				+ farm.getInventory().getWorkerCount(), labelStyle);
 		workers.setPosition(WORKER_LABEL_X, WORKER_LABEL_Y);
 
 		/* Stage setup */
@@ -1363,6 +1357,7 @@ public class FarmScreen extends AbstractScreen {
 				Texture workerTexture = new Texture(
 						Gdx.files.internal("textures/"
 								+ invWorkers.get(i).getTextureName() + ".png"));
+				workerTextures.add(workerTexture);
 				TextureRegion workerTRigion = new TextureRegion(workerTexture);
 				Image workerImage = new Image(workerTRigion);
 				Button workerButton = new Button(workerImage, skin);

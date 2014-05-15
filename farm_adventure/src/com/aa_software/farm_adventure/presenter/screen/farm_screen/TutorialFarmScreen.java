@@ -64,7 +64,7 @@ public class TutorialFarmScreen extends FarmScreen {
 	}
 
 	/* Font setup */
-	public final static LabelStyle STYLE2 = new LabelStyle(FONT, Color.WHITE);
+	protected LabelStyle labelStyle2;
 
 	private String description;
 	private Stage descriptionStage;
@@ -80,23 +80,6 @@ public class TutorialFarmScreen extends FarmScreen {
 	 */
 	public TutorialFarmScreen() {
 		super(Biome.Type.GRASSLAND);
-		states = State.values();
-
-		descriptionStage = new Stage(STAGE_WIDTH,
-				STAGE_HEIGHT, true);
-
-		descriptionWindow = setupWindow("Tutorial Guide:", 0, 0);
-		descriptionWindow.setVisible(true);
-		descriptionStage.addActor(descriptionWindow);
-		getDescription();
-		updateDescription();
-		setAllGameClicksDisabled(true);
-		disableGameTime = true;
-		foundClick = true;
-
-		for (int i = 0; i < 2; i++) {
-			farm.getInventory().addItem(new DefaultWorker());
-		}
 	}
 
 	/**
@@ -108,13 +91,20 @@ public class TutorialFarmScreen extends FarmScreen {
 	@Override
 	protected void addSeedButton(AbstractSeed seed) {
 		Table seedTable = new Table();
-		Texture seedTexture = new Texture(Gdx.files.internal("textures/"
-				+ seed.getTextureName() + ".png"));
-		TextureRegion seedImage = new TextureRegion(seedTexture);
+		TextureRegion seedImage = null;
+		if (seed.getTextureName() == "beetSeed") {
+			seedImage = new TextureRegion(beetTexture);
+		} else if (seed.getTextureName() == "cabbageSeed") {
+			seedImage = new TextureRegion(cabbageTexture);
+		} else if (seed.getTextureName() == "carrotSeed") {
+			seedImage = new TextureRegion(carrotTexture);
+		} else if (seed.getTextureName() == "potatoSeed") {
+			seedImage = new TextureRegion(potatoTexture);
+		}
 		seedTable.row();
 		seedTable.add(new Image(seedImage));
 		Label seedQuantity = new Label("" + farm.getInventory().getCount(seed),
-				LABEL_STYLE);
+				skin);
 		seedTable.row();
 		seedTable.add(seedQuantity);
 		Button seedButton = new Button(seedTable, skin);
@@ -128,10 +118,8 @@ public class TutorialFarmScreen extends FarmScreen {
 	 */
 	@Override
 	public void dispose() {
+		super.dispose();
 		setAllGameClicksDisabled(false);
-		farm.disposeOfTimers();
-		map.dispose();
-		renderer.dispose();
 		descriptionStage.dispose();
 		FarmAdventure.getInstance().setScreen(new MainMenuScreen());
 	}
@@ -147,22 +135,22 @@ public class TutorialFarmScreen extends FarmScreen {
 			break;
 		case DESCRIBE_FIELD:
 			description = "This is your field with plots and water.";
-			descriptionX = (float) (width  * .25);
+			descriptionX = (float) (width * .25);
 			descriptionY = (float) (height * .7);
 			break;
 		case DESCRIBE_STATUS_BAR:
 			description = "This is the status bar which displays\nyour money, time left, and workers.";
-			descriptionX = (float) (width  * .25);
+			descriptionX = (float) (width * .25);
 			descriptionY = (float) (height * .25);
 			break;
 		case DESCRIBE_PLOW_WORKER:
 			description = "These are \navailable farmers \nthat can labor \na plot.";
-			descriptionX = (float) (width  * .65);
+			descriptionX = (float) (width * .65);
 			descriptionY = (float) (height * .15);
 			break;
 		case CLICK_PLOW_WORKER:
 			description = "Select a worker to \nplow a plot.";
-			descriptionX = (float) (width  * .65);
+			descriptionX = (float) (width * .65);
 			descriptionY = (float) (height * .15);
 			foundClick = false;
 			workerClicksDisabled = false;
@@ -170,12 +158,12 @@ public class TutorialFarmScreen extends FarmScreen {
 
 		case DESCRIBE_TOOL_BAR:
 			description = "This is the tool bar which allows\nyou to perform actions on the farm.";
-			descriptionX = (float) (width  * .25);
+			descriptionX = (float) (width * .25);
 			descriptionY = (float) (height * .13);
 			break;
 		case DESCRIBE_PLOW:
 			description = "This is the plow\ntool which plows \n a plot of land.";
-			descriptionX = width  * 0;
+			descriptionX = width * 0;
 			descriptionY = (float) (height * .13);
 			break;
 		case CLICK_PLOW:
@@ -186,30 +174,30 @@ public class TutorialFarmScreen extends FarmScreen {
 			break;
 		case CLICK_PLOW_PLOT:
 			description = "Now click a plot to plow it.";
-			descriptionX = (float) (width  * .35);
+			descriptionX = (float) (width * .35);
 			descriptionY = (float) (height * .9);
 			foundClick = false;
 			fieldClicksDisabled = false;
 			break;
 		case WAIT_PLOW_PLOT:
 			description = "One of your workers has taken up the task.";
-			descriptionX = (float) (width  * .25);
+			descriptionX = (float) (width * .25);
 			break;
 		case CLICK_IRRIGATE_WORKER:
 			description = "Select a worker to \nirrigate a plot.";
-			descriptionX = (float) (width  * .65);
+			descriptionX = (float) (width * .65);
 			descriptionY = (float) (height * .15);
 			foundClick = false;
 			workerClicksDisabled = false;
 			break;
 		case DESCRIBE_IRRIGATE:
 			description = "This is the irrigation\ntool which allows you\nto irrigate your plots.";
-			descriptionX = (float) (width  * .15);
+			descriptionX = (float) (width * .15);
 			descriptionY = (float) (height * .13);
 			break;
 		case CLICK_IRRIGATE:
 			description = "Click the irrigation tool.";
-			descriptionX = (float) (width  * .18);
+			descriptionX = (float) (width * .18);
 			descriptionY = (float) (height * .13);
 			toolBarClicksDisabled = false;
 			foundClick = false;
@@ -220,7 +208,7 @@ public class TutorialFarmScreen extends FarmScreen {
 			// plow... not too bad, but...
 			description = "Now click a plot to irrigate it.\nGet the irrigation\n"
 					+ "to the plowed plot.";
-			descriptionX = (float) (width  * .35);
+			descriptionX = (float) (width * .35);
 			descriptionY = (float) (height * .9);
 			toolBarClicksDisabled = false;
 			foundClick = false;
@@ -230,19 +218,19 @@ public class TutorialFarmScreen extends FarmScreen {
 			break;
 		case CLICK_PLANT_WORKER:
 			description = "Select a worker to \nplant on a plot.";
-			descriptionX = (float) (width  * .65);
+			descriptionX = (float) (width * .65);
 			descriptionY = (float) (height * .15);
 			foundClick = false;
 			workerClicksDisabled = false;
 			break;
 		case DESCRIBE_PLANT:
 			description = "This is the planting\ntool which plants seeds.";
-			descriptionX = (float) (width  * .35);
+			descriptionX = (float) (width * .35);
 			descriptionY = (float) (height * .13);
 			break;
 		case CLICK_PLANT:
 			description = "Click the plant tool.";
-			descriptionX = (float) (width  * .40);
+			descriptionX = (float) (width * .40);
 			descriptionY = (float) (height * .13);
 			toolBarClicksDisabled = false;
 			foundClick = false;
@@ -250,7 +238,7 @@ public class TutorialFarmScreen extends FarmScreen {
 			break;
 		case CLICK_CLICK_PLANT:
 			description = "Click the plant tool\nagain to choose a plant.";
-			descriptionX = (float) (width  * .37);
+			descriptionX = (float) (width * .37);
 			descriptionY = (float) (height * .13);
 			plantMenuClicksDisabled = false;
 			toolBarClicksDisabled = false;
@@ -259,37 +247,37 @@ public class TutorialFarmScreen extends FarmScreen {
 			break;
 		case CLICK_PLANT_MENU:
 			description = "Now choose a type of seed.";
-			descriptionX = (float) (width  * .35);
+			descriptionX = (float) (width * .35);
 			descriptionY = (float) (height * .7);
 			foundClick = false;
 			plantMenuClicksDisabled = false;
 			break;
 		case CLICK_PLANT_PLOT:
 			description = "Now choose a plot to plant on.";
-			descriptionX = (float) (width  * .35);
+			descriptionX = (float) (width * .35);
 			descriptionY = (float) (height * .7);
 			foundClick = false;
 			fieldClicksDisabled = false;
 			break;
 		case WAIT_PLANT_PLOT:
 			description = "One of your workers has taken up the task.";
-			descriptionX = (float) (width  * .25);
+			descriptionX = (float) (width * .25);
 			break;
 		case CLICK_HARVEST_WORKER:
 			description = "Select a worker to \nharvest a plot.";
-			descriptionX = (float) (width  * .65);
+			descriptionX = (float) (width * .65);
 			descriptionY = (float) (height * .15);
 			foundClick = false;
 			workerClicksDisabled = false;
 			break;
 		case DESCRIBE_HARVEST:
 			description = "This is the harvesting\ntool which will harvest\ngrown plants.";
-			descriptionX = (float) (width  * .55);
+			descriptionX = (float) (width * .55);
 			descriptionY = (float) (height * .13);
 			break;
 		case CLICK_HARVEST:
 			description = "Click the harvest tool.";
-			descriptionX = (float) (width  * .60);
+			descriptionX = (float) (width * .60);
 			descriptionY = (float) (height * .13);
 			toolBarClicksDisabled = false;
 			foundClick = false;
@@ -298,7 +286,7 @@ public class TutorialFarmScreen extends FarmScreen {
 		case CLICK_HARVEST_PLOT:
 			// TODO: should make sure the harvested plot had a plant!
 			description = "Now click a plot to harvest it.";
-			descriptionX = (float) (width  * .35);
+			descriptionX = (float) (width * .35);
 			descriptionY = (float) (height * .9);
 			foundClick = false;
 			irrigationMenuClicksDisabled = false;
@@ -306,16 +294,16 @@ public class TutorialFarmScreen extends FarmScreen {
 			break;
 		case WAIT_HARVEST_PLOT:
 			description = "One of your workers has taken up the task.";
-			descriptionX = (float) (width  * .25);
+			descriptionX = (float) (width * .25);
 			break;
 		case DESCRIBE_INVENTORY:
 			description = "This is inventory\nand market button.";
-			descriptionX = (float) (width  * .85);
+			descriptionX = (float) (width * .85);
 			descriptionY = (float) (height * .13);
 			break;
 		case CLICK_INVENTORY:
 			description = "Click the inventory\nand market button.";
-			descriptionX = (float) (width  * .85);
+			descriptionX = (float) (width * .85);
 			descriptionY = (float) (height * .13);
 			toolBarClicksDisabled = false;
 			inventoryClicksDisabled = false;
@@ -324,23 +312,23 @@ public class TutorialFarmScreen extends FarmScreen {
 			break;
 		case DESCRIBE_INVENTORY_SCREEN:
 			description = "This is your inventory and market screen.";
-			descriptionX = (float) (width  * .25);
+			descriptionX = (float) (width * .25);
 			descriptionY = (float) (height * .7);
 			break;
 		case DESCRIBE_QUANTITY:
 			description = "This is the quantity \nthat you own of a \ncertain item.";
-			descriptionX = (float) (width  * .13);
+			descriptionX = (float) (width * .13);
 			descriptionY = (float) (height * .8);
 			break;
 		case DESCRIBE_BUY_AND_SELL:
 			description = "You can use these buttons to\npurchase or sell items\nand hire workers.";
-			descriptionX = (float) (width  * .4);
+			descriptionX = (float) (width * .4);
 			descriptionY = (float) (height * .7);
 			break;
 
 		case CLICK_BUY_AND_SELL:
 			description = "Buy, sell, hire,\nor upgrade and item.";
-			descriptionX = (float) (width  * .7);
+			descriptionX = (float) (width * .7);
 			descriptionY = (float) (height * .8);
 			break;
 		case DESCRIBE_INFO:
@@ -469,6 +457,28 @@ public class TutorialFarmScreen extends FarmScreen {
 		descriptionStage.setViewport(STAGE_WIDTH, STAGE_HEIGHT);
 	}
 
+	@Override
+	public void show() {
+		super.show();
+		labelStyle2 = new LabelStyle(font, Color.WHITE);
+		states = State.values();
+		stateIndex = State.END.ordinal();
+		descriptionStage = new Stage(STAGE_WIDTH, STAGE_HEIGHT, true);
+
+		descriptionWindow = setupWindow("Tutorial Guide:", 0, 0);
+		descriptionWindow.setVisible(true);
+		descriptionStage.addActor(descriptionWindow);
+		getDescription();
+		updateDescription();
+		setAllGameClicksDisabled(true);
+		disableGameTime = true;
+		foundClick = true;
+
+		for (int i = 0; i < 2; i++) {
+			farm.getInventory().addItem(new DefaultWorker());
+		}
+	}
+
 	public void transitionState() {
 		descriptionWindow.clear();
 		setAllGameClicksDisabled(true);
@@ -480,7 +490,7 @@ public class TutorialFarmScreen extends FarmScreen {
 	}
 
 	public void updateDescription() {
-		Label description = new Label(this.description, STYLE2);
+		Label description = new Label(this.description, labelStyle2);
 		description.setColor(Color.ORANGE);
 		descriptionWindow.add(description);
 
@@ -525,6 +535,7 @@ public class TutorialFarmScreen extends FarmScreen {
 					Gdx.files.internal(TextureHelper
 							.getIrrigationTextureFileName(EnumSet
 									.of(irrigation))));
+			irrigationTextures.add(irrigationTexture);
 			TextureRegion irrigationImage = new TextureRegion(irrigationTexture);
 			Button irrigationButton = new Button(new Image(irrigationImage),
 					skin);

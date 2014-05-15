@@ -60,6 +60,12 @@ public class Sounds {
 		masterVolume = 1;
 	}
 
+	public void dispose() {
+		click.dispose();
+		money.dispose();
+		mainMusic.dispose();
+	}
+
 	/**
 	 * Returns the master volume of the game.
 	 * 
@@ -80,12 +86,6 @@ public class Sounds {
 	 */
 	public float getSoundVolume() {
 		return soundVolume;
-	}
-	
-	public void dispose(){
-		click.dispose();
-		money.dispose();
-		mainMusic.dispose();
 	}
 
 	/**

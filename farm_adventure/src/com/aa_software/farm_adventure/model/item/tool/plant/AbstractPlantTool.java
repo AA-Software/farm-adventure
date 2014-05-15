@@ -112,7 +112,7 @@ public abstract class AbstractPlantTool extends AbstractTool {
 			plot.setUsable(false);
 			float delay = (workTime * worker.getWorkRate() + seed
 					.getGrowthTime()) / (plot.getWorkStatusTextureLength() - 1);
-			TIMER.schedule(new PlantTask(plot, seed, worker, delay), delay);
+			Timer.schedule(new PlantTask(plot, seed, worker, delay), delay);
 			SOUNDS.playClick();
 			this.seed = null;
 			worker.resetTexture();

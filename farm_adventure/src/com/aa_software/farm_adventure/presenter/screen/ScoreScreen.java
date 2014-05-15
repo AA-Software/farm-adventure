@@ -19,20 +19,9 @@ public class ScoreScreen extends AbstractScreen {
 		super();
 		this.stats = stats;
 	}
-	
-	@Override
-	public void dispose() {
-		
-	}
-	
-	@Override
-	public void render(float delta) {
-		super.render(delta);
-		checkBackButton();
-	}
-	
-	private void checkBackButton(){
-		if(Gdx.input.isKeyPressed(Keys.BACK)){
+
+	private void checkBackButton() {
+		if (Gdx.input.isKeyPressed(Keys.BACK)) {
 			Gdx.input.setCatchBackKey(true);
 			FarmAdventure.getInstance().setScreen(new WorldScreen());
 			dispose();
@@ -40,20 +29,30 @@ public class ScoreScreen extends AbstractScreen {
 	}
 
 	@Override
+	public void dispose() {
+		super.dispose();
+	}
+
+	@Override
+	public void render(float delta) {
+		super.render(delta);
+		checkBackButton();
+	}
+
+	@Override
 	public void show() {
 		super.show();
 
-		Table table = new Table(super.getSkin());
+		Table table = new Table(skin);
 		table.setFillParent(true);
 
-		super.addActor(table);
+		stage.addActor(table);
 
 		table.add("Score:").spaceBottom(50);
 		table.row();
 		table.add(Integer.toString(stats.getScore())).spaceBottom(50);
 		table.row();
-		TextButton startGameButton = new TextButton("Continue to the Map",
-				super.getSkin());
+		TextButton startGameButton = new TextButton("Continue to the Map", skin);
 
 		// This line of code will take the user to the world screen on click or
 		// touch
@@ -63,6 +62,7 @@ public class ScoreScreen extends AbstractScreen {
 					int pointer, int button) {
 				FarmAdventure.getInstance().setScreen(new WorldScreen());
 				SOUNDS.playClick();
+				dispose();
 				return true;
 			}
 		});

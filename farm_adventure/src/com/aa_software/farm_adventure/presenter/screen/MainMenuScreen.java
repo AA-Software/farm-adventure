@@ -7,53 +7,51 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 
 public class MainMenuScreen extends AbstractScreen {
 
 	public static final Sounds SOUNDS = Sounds.getInstance();
-	private Skin skin;
 	private static final int BUTTON_WIDTH = 300;
 	private static final int BUTTON_HEIGHT = 60;
 	private static final int TITLE_SPACE = 50;
 	private static final int BUTTON_SPACE = 10;
+
 	private Table table;
-	
+
 	public MainMenuScreen() {
 		super();
 	}
 
-	@Override
-	public void show() {
-		super.show();
-		setupMainMenu();
+	protected void checkBackButton() {
+		if (Gdx.input.isKeyPressed(Keys.BACK)) {
+			Gdx.input.setCatchBackKey(true);
+		}
 	}
-	
+
+	@Override
+	public void dispose() {
+		super.dispose();
+	}
+
 	@Override
 	public void render(float delta) {
 		super.render(delta);
 		checkBackButton();
 	}
-	
-	protected void checkBackButton(){
-		if(Gdx.input.isKeyPressed(Keys.BACK)){
-			Gdx.input.setCatchBackKey(true);
-		}
-	}
-	
-	private void setupMainMenu(){
-		skin = super.getSkin();
+
+	private void setupMainMenu() {
 		// Create table
 		table = new Table(skin);
 		table.setFillParent(true);
 
-		super.addActor(table);
+		stage.addActor(table);
 
 		// Add label to table
-		table.add("Welcome to FarmAdventure for Android!")
-		.spaceBottom(TITLE_SPACE);
+		Label heading = new Label("Welcome to FarmAdventure for Android!", skin);
+		table.add(heading).spaceBottom(TITLE_SPACE);
 		table.row();
 
 		// register the button "start game"
@@ -70,11 +68,13 @@ public class MainMenuScreen extends AbstractScreen {
 					int pointer, int button) {
 				SOUNDS.playClick();
 				FarmAdventure.getInstance().setScreen(new WorldScreen());
+				dispose();
 				return true;
 			}
 		});
+
 		table.add(startGameButton).size(BUTTON_WIDTH, BUTTON_HEIGHT).uniform()
-		.spaceBottom(BUTTON_SPACE);
+				.spaceBottom(BUTTON_SPACE);
 		table.row();
 
 		// register tutorial button
@@ -87,11 +87,13 @@ public class MainMenuScreen extends AbstractScreen {
 					int pointer, int button) {
 				SOUNDS.playClick();
 				FarmAdventure.getInstance().setScreen(new TutorialFarmScreen());
+				dispose();
 				return true;
 			}
 		});
+
 		table.add(tutorialButton).size(BUTTON_WIDTH, BUTTON_HEIGHT).uniform()
-		.spaceBottom(BUTTON_SPACE);
+				.spaceBottom(BUTTON_SPACE);
 		table.row();
 
 		// register tutorial button
@@ -104,12 +106,19 @@ public class MainMenuScreen extends AbstractScreen {
 					int pointer, int button) {
 				SOUNDS.playClick();
 				FarmAdventure.getInstance().setScreen(new OptionsScreen());
+				dispose();
 				return true;
 			}
 		});
 		table.add(optionsButton).size(BUTTON_WIDTH, BUTTON_HEIGHT).uniform()
-		.spaceBottom(BUTTON_SPACE);
+				.spaceBottom(BUTTON_SPACE);
 		table.row();
+	}
+
+	@Override
+	public void show() {
+		super.show();
+		setupMainMenu();
 	}
 
 }

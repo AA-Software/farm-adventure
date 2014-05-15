@@ -14,10 +14,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -41,9 +39,11 @@ public class WorldScreen extends AbstractScreen {
 	protected float screenWidth = STAGE_WIDTH;
 	protected float screenHeight = STAGE_HEIGHT;
 
-	private Skin skin;
-	protected Stage farmMenuStage;
 	protected Window seasonWindow;
+	protected Texture spring, summer, winter, fall;
+	protected Texture background;
+	protected Texture tutorialTexture, rainforestTexture, desertTexture,
+			snowTexture;
 
 	protected static final Biome.Type[] BIOMES = { Biome.Type.GRASSLAND,
 			Biome.Type.TROPICAL, Biome.Type.TEMPERATE, Biome.Type.BOREAL };
@@ -57,34 +57,33 @@ public class WorldScreen extends AbstractScreen {
 	public WorldScreen() {
 		super();
 	}
-	
-	/**
-	 * Creates and displays the world map and buttons. Handles the on click for
-	 * the buttons - starting up a new farm.
-	 */
-	@Override
-	public void show() {
-		super.show();
-		skin = super.getSkin();
-		setupWorldMap();
+
+	private void checkBackButton() {
+		if (Gdx.input.isKeyPressed(Keys.BACK)) {
+			Gdx.input.setCatchBackKey(true);
+			FarmAdventure.getInstance().setScreen(new MainMenuScreen());
+			dispose();
+		}
 	}
-	
+
 	@Override
 	public void dispose() {
-		
+		super.dispose();
+		spring.dispose();
+		summer.dispose();
+		fall.dispose();
+		winter.dispose();
+		background.dispose();
+		tutorialTexture.dispose();
+		rainforestTexture.dispose();
+		desertTexture.dispose();
+		snowTexture.dispose();
 	}
-	
+
 	@Override
 	public void render(float delta) {
 		super.render(delta);
 		checkBackButton();
-	}
-	
-	private void checkBackButton(){
-		if(Gdx.input.isKeyPressed(Keys.BACK)){
-			Gdx.input.setCatchBackKey(true);
-			FarmAdventure.getInstance().setScreen(new MainMenuScreen());
-		}
 	}
 
 	/**
@@ -93,12 +92,10 @@ public class WorldScreen extends AbstractScreen {
 	 */
 	public void setupSeasonMenu(final Biome.Type biome) {
 
-		// Gdx.input.setInputProcessor(plantMenuStage);
-
-		Texture spring = new Texture(Gdx.files.internal("textures/spring.png"));
-		Texture summer = new Texture(Gdx.files.internal("textures/summer.png"));
-		Texture fall = new Texture(Gdx.files.internal("textures/fall.png"));
-		Texture winter = new Texture(Gdx.files.internal("textures/winter.png"));
+		spring = new Texture(Gdx.files.internal("textures/spring.png"));
+		summer = new Texture(Gdx.files.internal("textures/summer.png"));
+		fall = new Texture(Gdx.files.internal("textures/fall.png"));
+		winter = new Texture(Gdx.files.internal("textures/winter.png"));
 
 		TextureRegion springImage = new TextureRegion(spring);
 		TextureRegion summerImage = new TextureRegion(summer);
@@ -148,7 +145,7 @@ public class WorldScreen extends AbstractScreen {
 		seasonWindow.row();
 		seasonWindow.add(playFarmButton).colspan(4).width(200);
 		seasonWindow.pack();
-		super.addActor(seasonWindow);
+		stage.addActor(seasonWindow);
 
 		playFarmButton.addListener(new InputListener() {
 			@Override
@@ -156,9 +153,11 @@ public class WorldScreen extends AbstractScreen {
 					int pointer, int button) {
 				FarmAdventure.getInstance().setScreen(new FarmScreen(biome));
 				SOUNDS.playClick();
+				dispose();
 				return true;
 			}
 		});
+
 	}
 
 	/**
@@ -168,35 +167,34 @@ public class WorldScreen extends AbstractScreen {
 	 */
 	public void setupWorldMap() {
 		// Create background and table
-		Image background = new Image(new Texture(
-				Gdx.files.internal("world/WorldMap.png")));
+		background = new Texture(Gdx.files.internal("world/WorldMap.png"));
+		Image backgroundImage = new Image(background);
+		backgroundImage.setFillParent(true);
+		stage.addActor(backgroundImage);
+
 		Table table = new Table();
-		background.setFillParent(true);
-		// if(FarmAdventure.DEV_MODE)
-		// table.debug();
-		super.addActor(background);
-		super.addActor(table);
+		stage.addActor(table);
 		table.setFillParent(true);
 
 		// Set up the texture for the button
-		final Texture tutorialTex = new Texture(
+		tutorialTexture = new Texture(
 				Gdx.files.internal("world/TutorialFarm.png"));
-		final Texture rainforestTex = new Texture(
+		rainforestTexture = new Texture(
 				Gdx.files.internal("world/RainforestFarm.png"));
-		final Texture desertTex = new Texture(
-				Gdx.files.internal("world/DesertFarm.png"));
-		final Texture snowTex = new Texture(
-				Gdx.files.internal("world/SnowFarm.png"));
+		desertTexture = new Texture(Gdx.files.internal("world/DesertFarm.png"));
+		snowTexture = new Texture(Gdx.files.internal("world/SnowFarm.png"));
 
 		// Create buttons
 		List<Button> farmButtons = new ArrayList<Button>();
-		Button grasslandFarmButton = new Button(new Image(tutorialTex), skin);
+		Button grasslandFarmButton = new Button(new Image(tutorialTexture),
+				skin);
 		farmButtons.add(grasslandFarmButton);
-		Button tropicalFarmButton = new Button(new Image(rainforestTex), skin);
+		Button tropicalFarmButton = new Button(new Image(rainforestTexture),
+				skin);
 		farmButtons.add(tropicalFarmButton);
-		Button temperateFarmButton = new Button(new Image(desertTex), skin);
+		Button temperateFarmButton = new Button(new Image(desertTexture), skin);
 		farmButtons.add(temperateFarmButton);
-		Button borealFarmButton = new Button(new Image(snowTex), skin);
+		Button borealFarmButton = new Button(new Image(snowTexture), skin);
 		farmButtons.add(borealFarmButton);
 
 		int index = 0;
@@ -231,6 +229,15 @@ public class WorldScreen extends AbstractScreen {
 				.padRight((float) (.15 * screenWidth));
 		table.row();
 	}
-	
-	
+
+	/**
+	 * Creates and displays the world map and buttons. Handles the on click for
+	 * the buttons - starting up a new farm.
+	 */
+	@Override
+	public void show() {
+		super.show();
+		setupWorldMap();
+	}
+
 }

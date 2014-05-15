@@ -48,7 +48,7 @@ public abstract class AbstractPlowTool extends AbstractTool {
 			worker.setBusy(true);
 			plot.setUsable(false);
 			SOUNDS.playClick();
-			TIMER.schedule(
+			Timer.schedule(
 					new Task() {
 						@Override
 						public void run() {

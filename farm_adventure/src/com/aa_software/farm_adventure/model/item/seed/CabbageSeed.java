@@ -18,7 +18,7 @@ public class CabbageSeed extends AbstractSeed {
 	public static final String SEED_TEXTURE_NAME = "cabbageSeed";
 
 	public CabbageSeed() {
-		super(COST, VALUE, NAME, DESCRIPTION, GROWTH_RATE, 1, new CabbageCrop(),
-				SEED_TEXTURE_NAME);
+		super(COST, VALUE, NAME, DESCRIPTION, GROWTH_RATE, 1,
+				new CabbageCrop(), SEED_TEXTURE_NAME);
 	}
 }
