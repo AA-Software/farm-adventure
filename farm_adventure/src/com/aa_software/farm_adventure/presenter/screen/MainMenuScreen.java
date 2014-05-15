@@ -28,6 +28,7 @@ public class MainMenuScreen extends AbstractScreen {
 	protected void checkBackButton() {
 		if (Gdx.input.isKeyPressed(Keys.BACK)) {
 			Gdx.input.setCatchBackKey(true);
+			Gdx.app.exit();
 		}
 	}
 

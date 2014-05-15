@@ -462,7 +462,7 @@ public class TutorialFarmScreen extends FarmScreen {
 		super.show();
 		labelStyle2 = new LabelStyle(font, Color.WHITE);
 		states = State.values();
-		stateIndex = State.END.ordinal();
+
 		descriptionStage = new Stage(STAGE_WIDTH, STAGE_HEIGHT, true);
 
 		descriptionWindow = setupWindow("Tutorial Guide:", 0, 0);
