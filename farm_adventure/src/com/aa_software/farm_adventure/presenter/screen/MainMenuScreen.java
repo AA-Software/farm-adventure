@@ -59,7 +59,7 @@ public class MainMenuScreen extends AbstractScreen {
 		TextButton startGameButton = new TextButton("Start game", skin);
 
 		// Start Music
-		SOUNDS.playMusic();
+		SOUNDS.playMusic(true);
 
 		// This line of code will take the user to the world screen on click or
 		// touch
@@ -69,7 +69,6 @@ public class MainMenuScreen extends AbstractScreen {
 					int pointer, int button) {
 				SOUNDS.playClick();
 				FarmAdventure.getInstance().setScreen(new WorldScreen());
-				dispose();
 				return true;
 			}
 		});
@@ -88,7 +87,6 @@ public class MainMenuScreen extends AbstractScreen {
 					int pointer, int button) {
 				SOUNDS.playClick();
 				FarmAdventure.getInstance().setScreen(new TutorialFarmScreen());
-				dispose();
 				return true;
 			}
 		});
@@ -107,7 +105,6 @@ public class MainMenuScreen extends AbstractScreen {
 					int pointer, int button) {
 				SOUNDS.playClick();
 				FarmAdventure.getInstance().setScreen(new OptionsScreen());
-				dispose();
 				return true;
 			}
 		});

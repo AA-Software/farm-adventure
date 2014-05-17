@@ -31,7 +31,8 @@ public abstract class AbstractScreen implements Screen {
 
 	@Override
 	public void hide() {
-
+		FarmAdventure.log("disposing: " + getName());
+		dispose();
 	}
 
 	@Override

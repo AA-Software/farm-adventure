@@ -24,7 +24,6 @@ public class ScoreScreen extends AbstractScreen {
 		if (Gdx.input.isKeyPressed(Keys.BACK)) {
 			Gdx.input.setCatchBackKey(true);
 			FarmAdventure.getInstance().setScreen(new WorldScreen());
-			dispose();
 		}
 	}
 
@@ -62,7 +61,6 @@ public class ScoreScreen extends AbstractScreen {
 					int pointer, int button) {
 				FarmAdventure.getInstance().setScreen(new WorldScreen());
 				SOUNDS.playClick();
-				dispose();
 				return true;
 			}
 		});

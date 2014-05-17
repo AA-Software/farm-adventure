@@ -361,7 +361,6 @@ public class FarmScreen extends AbstractScreen {
 	protected boolean inventoryClicksDisabled;
 
 	protected boolean disableGameTime;
-	protected boolean gameOver;
 
 	protected Stats stats;
 
@@ -460,7 +459,6 @@ public class FarmScreen extends AbstractScreen {
 		if (Gdx.input.isKeyPressed(Keys.BACK)) {
 			Gdx.input.setCatchBackKey(true);
 			// TODO add a pop up asking if they want to quit
-			gameOver = true;
 		}
 	}
 
@@ -547,12 +545,6 @@ public class FarmScreen extends AbstractScreen {
 	 */
 	@Override
 	public void render(float delta) {
-		if (gameOver) {
-			dispose();
-			stats.setScore(PLAYER.getBankroll() + calculateScore());
-			PLAYER.setBankroll(PLAYER.getBankroll() + calculateScore());
-			FarmAdventure.getInstance().setScreen(new ScoreScreen(stats));
-		} else {
 			super.render(delta);
 
 			if (hasVisibleWindow() == false) {
@@ -593,8 +585,6 @@ public class FarmScreen extends AbstractScreen {
 
 			infoStage.act(delta);
 			infoStage.draw();
-
-		}
 	}
 
 	@Override
@@ -699,7 +689,6 @@ public class FarmScreen extends AbstractScreen {
 	public void show() {
 		super.show();
 
-		gameOver = false;
 		disableGameTime = false;
 		setAllGameClicksDisabled(false);
 
@@ -1311,7 +1300,9 @@ public class FarmScreen extends AbstractScreen {
 			long curTime = gameStartTime + GAME_TIME_MILLIS
 					- System.currentTimeMillis();
 			if (curTime < 0) {
-				gameOver = true;
+				stats.setScore(PLAYER.getBankroll() + calculateScore());
+				PLAYER.setBankroll(PLAYER.getBankroll() + calculateScore());
+				FarmAdventure.getInstance().setScreen(new ScoreScreen(stats));
 			}
 			/* 1000 milliseconds = 1 second */
 			if (!(curTime < 1000)) {

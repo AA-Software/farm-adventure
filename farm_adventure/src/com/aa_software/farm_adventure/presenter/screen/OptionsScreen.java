@@ -18,10 +18,10 @@ public class OptionsScreen extends AbstractScreen {
 	public final Sounds sounds = Sounds.getInstance();
 
 	private Slider masterVolumeSlider;
-	private Slider gameVolumeSlider;
+	private Slider soundVolumeSlider;
 	private Slider musicVolumeSlider;
 	private Label masterValueLabel;
-	private Label gameValueLabel;
+	private Label soundValueLabel;
 	private Label musicValueLabel;
 
 	public OptionsScreen() {
@@ -60,7 +60,7 @@ public class OptionsScreen extends AbstractScreen {
 		// Create masterVolume label
 		table.add("Master Volume: ");
 		masterVolumeSlider = new Slider(0, 100, 5, false, skin);
-		masterVolumeSlider.setValue(sounds.getMasterVolume());
+		masterVolumeSlider.setValue(100 * sounds.getMasterVolume());
 
 		// Add listener
 		masterVolumeSlider.addListener(new ChangeListener() {
@@ -68,10 +68,7 @@ public class OptionsScreen extends AbstractScreen {
 			public void changed(ChangeEvent event, Actor actor) {
 				masterValueLabel.setText((int) masterVolumeSlider.getValue()
 						+ "%");
-				sounds.setMusicVolume((masterVolumeSlider.getValue() / 100)
-						* (musicVolumeSlider.getValue() / 100));
-				sounds.setSoundVolume((masterVolumeSlider.getValue() / 100)
-						* (gameVolumeSlider.getValue() / 100));
+				sounds.setMasterVolume((masterVolumeSlider.getValue() / 100));
 			}
 		});
 		table.add(masterVolumeSlider);
@@ -84,23 +81,22 @@ public class OptionsScreen extends AbstractScreen {
 
 		// Create gameVolume label
 		table.add("Game Volume: ");
-		gameVolumeSlider = new Slider(0, 100, 5, false, skin);
-		gameVolumeSlider.setValue(100 * sounds.getSoundVolume());
+		soundVolumeSlider = new Slider(0, 100, 5, false, skin);
+		soundVolumeSlider.setValue(100 * sounds.getSoundVolume());
 
 		// Add listener
-		gameVolumeSlider.addListener(new ChangeListener() {
+		soundVolumeSlider.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				gameValueLabel.setText((int) gameVolumeSlider.getValue() + "%");
-				sounds.setSoundVolume((masterVolumeSlider.getValue() / 100)
-						* (gameVolumeSlider.getValue() / 100));
+				soundValueLabel.setText((int) soundVolumeSlider.getValue() + "%");
+				sounds.setSoundVolume((soundVolumeSlider.getValue() / 100));
 			}
 		});
-		table.add(gameVolumeSlider);
+		table.add(soundVolumeSlider);
 
-		gameValueLabel = new Label((int) gameVolumeSlider.getValue() + "%",
+		soundValueLabel = new Label((int) soundVolumeSlider.getValue() + "%",
 				skin);
-		table.add(gameValueLabel);
+		table.add(soundValueLabel);
 		table.row();
 
 		// Create musicVolume label
@@ -114,8 +110,7 @@ public class OptionsScreen extends AbstractScreen {
 			public void changed(ChangeEvent event, Actor actor) {
 				musicValueLabel.setText("" + (int) musicVolumeSlider.getValue()
 						+ "%");
-				sounds.setMusicVolume((masterVolumeSlider.getValue() / 100)
-						* (musicVolumeSlider.getValue() / 100));
+				sounds.setMusicVolume((musicVolumeSlider.getValue() / 100));
 			}
 		});
 		table.add(musicVolumeSlider);
@@ -131,7 +126,6 @@ public class OptionsScreen extends AbstractScreen {
 			public boolean touchDown(InputEvent event, float x, float y,
 					int pointer, int button) {
 				FarmAdventure.getInstance().setScreen(new MainMenuScreen());
-				dispose();
 				return true;
 			}
 		});

@@ -11,11 +11,7 @@ public class Preferences {
 	private static boolean isMuted = false;
 	private float soundVolume;
 	private float masterVolume;
-	private float gameVolume;
-
-	public float getGameVolume() {
-		return gameVolume;
-	}
+	private float musicVolume;
 
 	public float getMasterVolume() {
 		return masterVolume;
@@ -29,10 +25,6 @@ public class Preferences {
 		return isMuted;
 	}
 
-	public void setGameVolume(float gameVolume) {
-		this.gameVolume = gameVolume;
-	}
-
 	public void setMasterVolume(float masterVolume) {
 		this.masterVolume = masterVolume;
 	}
@@ -43,5 +35,13 @@ public class Preferences {
 
 	public void setSoundVolume(float soundVolume) {
 		this.soundVolume = soundVolume;
+	}
+
+	public float getMusicVolume() {
+		return musicVolume;
+	}
+
+	public void setMusicVolume(float musicVolume) {
+		this.musicVolume = musicVolume;
 	}
 }

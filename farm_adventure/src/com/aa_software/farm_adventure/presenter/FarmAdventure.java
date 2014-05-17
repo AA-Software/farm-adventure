@@ -12,7 +12,8 @@ import com.badlogic.gdx.graphics.GLTexture;
 public class FarmAdventure extends Game {
 
 	public static final String LOG = FarmAdventure.class.getSimpleName();
-	public static final boolean DEV_MODE = false;
+	public static final boolean DEV_MODE = true;
+	public static final boolean LOG_FPS = false;
 	private static FPSLogger FpsLogger;
 
 	private static FarmAdventure Instance = null;
@@ -76,7 +77,7 @@ public class FarmAdventure extends Game {
 	@Override
 	public void render() {
 		super.render();
-		if (DEV_MODE)
+		if (DEV_MODE && LOG_FPS)
 			logFPS();
 	}
 

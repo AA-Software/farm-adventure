@@ -36,6 +36,8 @@ public class Sounds {
 	 * Scales the volume of the game.
 	 */
 	protected float masterVolume;
+	
+	protected float musicVolume;
 
 	private static Sounds Instance;
 
@@ -58,6 +60,7 @@ public class Sounds {
 	private Sounds() {
 		soundVolume = 1;
 		masterVolume = 1;
+		musicVolume = 1;
 	}
 
 	public void dispose() {
@@ -76,7 +79,7 @@ public class Sounds {
 	}
 
 	public float getMusicVolume() {
-		return mainMusic.getVolume();
+		return musicVolume;
 	}
 
 	/**
@@ -99,22 +102,25 @@ public class Sounds {
 	 * Plays the click sound using libGDX.
 	 */
 	public void playClick() {
-		click.setVolume(click.play(), soundVolume);
+		click.setVolume(click.play(), soundVolume  * masterVolume);
 	}
 
 	/**
 	 * Plays the money sound using libGDX.
 	 */
 	public void playMoney() {
-		money.setVolume(money.play(), soundVolume);
+		money.setVolume(money.play(), soundVolume  * masterVolume);
 	}
 
 	/**
 	 * Plays the main music using libGDX.
 	 */
-	public void playMusic() {
-		mainMusic.setLooping(true);
-		mainMusic.play();
+	public void playMusic(boolean looping) {
+		mainMusic.setLooping(looping);
+		mainMusic.setVolume(musicVolume * masterVolume);
+		if(!mainMusic.isPlaying()) {
+			mainMusic.play();
+		}
 	}
 
 	/**
@@ -126,6 +132,7 @@ public class Sounds {
 	 */
 	public void setMasterVolume(float vol) {
 		masterVolume = vol;
+		mainMusic.setVolume(musicVolume * vol);
 	}
 
 	/**
@@ -136,17 +143,11 @@ public class Sounds {
 	 *            the highest.
 	 */
 	public void setMusicVolume(float vol) {
+		musicVolume = vol;
 		mainMusic.setVolume(masterVolume * vol);
 	}
 
-	/**
-	 * Sets the volume of the sounds.
-	 * 
-	 * @param vol
-	 *            a float in the range [0,1]. 0 is the lowest volume and 1 is
-	 *            the highest.
-	 */
 	public void setSoundVolume(float vol) {
-		soundVolume = masterVolume * vol;
+		soundVolume = vol;
 	}
 }

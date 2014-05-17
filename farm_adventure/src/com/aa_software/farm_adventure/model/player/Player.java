@@ -30,8 +30,6 @@ public class Player {
 
 	private Player() {
 		stats = new Stats();
-		this.stats.setScore(STARTING_BANKROLL);
-		// this.campaign = new TutorialCampaign();
 		this.preferences = new Preferences();
 	}
 
@@ -60,14 +58,10 @@ public class Player {
 		Sounds s = Sounds.getInstance();
 
 		if (prefs.contains("BANKROLL")) {
-			stats.setScore(prefs.getInteger("BANKROLL"));
-			s.setMasterVolume(prefs.getFloat("MASTERVOLUME"));
-			s.setMusicVolume(prefs.getFloat("GAMEVOLUME"));
-			s.setSoundVolume(prefs.getFloat("SOUNDVOLUME"));
-		} else {
-			s.setMasterVolume(1);
-			s.setMusicVolume(1);
-			s.setSoundVolume(1);
+			stats.setScore(prefs.getInteger("BANKROLL", STARTING_BANKROLL));
+			s.setMasterVolume(prefs.getFloat("MASTERVOLUME", 1));
+			s.setMusicVolume(prefs.getFloat("MUSICVOLUME", 1));
+			s.setSoundVolume(prefs.getFloat("SOUNDVOLUME", 1));
 		}
 	}
 
@@ -78,7 +72,7 @@ public class Player {
 
 		prefs.putInteger("BANKROLL", stats.getScore());
 		prefs.putFloat("MASTERVOLUME", s.getMasterVolume());
-		prefs.putFloat("GAMEVOLUME", s.getMusicVolume());
+		prefs.putFloat("MUSICVOLUME", s.getMusicVolume());
 		prefs.putFloat("SOUNDVOLUME", s.getSoundVolume());
 
 		// bulk update your preferences

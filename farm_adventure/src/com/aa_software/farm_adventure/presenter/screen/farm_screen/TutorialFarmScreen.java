@@ -121,7 +121,6 @@ public class TutorialFarmScreen extends FarmScreen {
 		super.dispose();
 		setAllGameClicksDisabled(false);
 		descriptionStage.dispose();
-		FarmAdventure.getInstance().setScreen(new MainMenuScreen());
 	}
 
 	public void getDescription() {
@@ -398,7 +397,7 @@ public class TutorialFarmScreen extends FarmScreen {
 			descriptionY = (float) (height * .7);
 			break;
 		case END:
-			gameOver = true;
+			FarmAdventure.getInstance().setScreen(new MainMenuScreen());
 			break;
 		default:
 			description = "Ran out of states!";
